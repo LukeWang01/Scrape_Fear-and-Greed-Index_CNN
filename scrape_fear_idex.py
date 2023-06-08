@@ -22,6 +22,8 @@ from _secret import LukeLab_Email_Pwd, LukeLab_Email
 MY_EMAIL = 'wangzilu9488@gmail.com'
 DRIVER_PATH = "chromedriver.exe"
 TARGET_URL = "https://www.cnn.com/markets/fear-and-greed"
+
+# add more receivers here:
 RECEIVER_EMAILS = ['wangzilu9488@gmail.com', 'road_prince@outlook.com']
 
 """ # 2. Utils functions: """
@@ -193,9 +195,9 @@ def get_time_index_list(hours=8, table_name='index_data'):
                 send_email(LukeLab_Email, MY_EMAIL, 'FGI Scraper Notify: Start',
                            'FGI Scraper Started, from Road device')
 
-                schedule_msg_body = f"FGI Scraper Started, \n " \
-                                    f"Time: 09:50 am, good morning, \n" \
-                                    f"Fear & Greed Index: {time_index[2]}" \
+                schedule_msg_body = f"FGI Scraper Started, \n" \
+                                    f"Time: 09:50 AM EST, good morning / evening, \n" \
+                                    f"Fear & Greed Index: {time_index[2]} \n" \
                                     f"A Fear & Greed Index daily summary will be sent after the market closed.\n"
 
                 schedule.every().day.at("09:50").do(send_emails, LukeLab_Email, RECEIVER_EMAILS,
@@ -235,8 +237,8 @@ def get_time_index_list(hours=8, table_name='index_data'):
               f"Morning Index: {morning_index} \n " \
               f"Noon Index: {noon_index} \n " \
               f"Afternoon Index: {afternoon_index}" \
-              f"max index: {max(all_index)} \n" \
-              f"min index: {min(all_index)} \n"
+              f"Max index: {max(all_index)} \n" \
+              f"Min index: {min(all_index)} \n"
 
     send_emails(LukeLab_Email, RECEIVER_EMAILS, 'FGI Scraper Notify: End', end_msg)
 

@@ -1,2 +1,4 @@
 
 _secret.py
+.idea
+*.xml

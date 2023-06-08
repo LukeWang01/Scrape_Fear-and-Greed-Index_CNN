@@ -14,3 +14,9 @@
 #### OR, run as schedule task on the cloud server:
 - `python schedule_runn.py`, this cmd will schedule a task run every weekday at 9:00 am EST
 - auto_schedule_run.bat file will auto run the cmd above.
+
+<br>
+
+#### Examples:
+![image1](img1.png "img1")
+![image2](img2.png "img2")
