@@ -13,6 +13,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from _secret import LukeLab_Email_Pwd, LukeLab_Email
+from scrape_cme import get_meeting_pro_and_total_prob
 
 # import chromedriver_autoinstaller as chromedriver
 # chromedriver.install()
@@ -22,9 +23,8 @@ from _secret import LukeLab_Email_Pwd, LukeLab_Email
 MY_EMAIL = 'wangzilu9488@gmail.com'
 DRIVER_PATH = "chromedriver.exe"
 TARGET_URL = "https://www.cnn.com/markets/fear-and-greed"
-
-# add more receivers here:
-RECEIVER_EMAILS = ['wangzilu9488@gmail.com', 'road_prince@outlook.com']
+RECEIVER_EMAILS = ['wangzilu9488@gmail.com', 'road_prince@outlook.com', 'liang11355@gmail.com', 
+                    '793925700@qq.com', 'whosam233@gmail.com', '1031980377@qq.com']
 
 """ # 2. Utils functions: """
 
@@ -55,12 +55,17 @@ def send_emails(from_, to: list, msg_subject, msg_body):
     # send an email to multiple recipients
     sender_email = from_
     receiver_emails = to  # ['recipient1@example.com', 'recipient2@example.com']
-    message = msg_body
+    # message = msg_body
+    #
+    # msg = MIMEText(message)
 
-    msg = MIMEText(message)
+    message = f"""<pre style="font-family: 'Courier New', monospace;">{msg_body}</pre>"""
+
+    msg = MIMEText(message, 'html')     # change the font style with Equal-Width Characters
+
     msg['Subject'] = msg_subject
     msg['From'] = sender_email
-    msg['To'] = 'wangzilu9488@gmail.com'
+    msg['To'] = 'lukelabtorary@gmail.com'
     # msg["Cc"] = ''
     # msg['Bcc'] = ', '.join(receiver_emails)
     # toaddrs = [msg['To']] + [msg['Bcc']]
@@ -68,7 +73,7 @@ def send_emails(from_, to: list, msg_subject, msg_body):
     with smtplib.SMTP('smtp.gmail.com', 587) as server:
         server.starttls()
         server.login(LukeLab_Email, LukeLab_Email_Pwd)
-        server.sendmail(LukeLab_Email, ['wangzilu9488@gmail.com'] + receiver_emails, msg.as_string())
+        server.sendmail(LukeLab_Email, ['lukelabtorary@gmail.com'] + receiver_emails, msg.as_string())
 
 
 # Set up app running log
@@ -140,7 +145,7 @@ def get_time_index_list(hours=8, table_name='index_data'):
         driver = webdriver.Chrome(service=service)
     except:
         print("Please update driver")
-        send_email(LukeLab_Email, MY_EMAIL, 'FGI Scraper Notify: driver update', 'Please update the driver')
+        send_email(LukeLab_Email, RECEIVER_EMAILS, 'FGI Scraper Notify: driver update', 'Please update the driver')
         return
 
     driver.maximize_window()
@@ -227,20 +232,27 @@ def get_time_index_list(hours=8, table_name='index_data'):
     time.sleep(5)
     driver.quit()
     print('web drive terminated')
+    time.sleep(10)
 
     # send email when the scraper ends
     morning_index = time_index_list[0][2]
     noon_index = time_index_list[int(len(time_index_list) // 2)][2]
     afternoon_index = time_index_list[-1][2]
     all_index = [i[2] for i in time_index_list]
-    end_msg = f"FGI Scraper Ended, from Road device, {len(time_index_list)} data points scraped. \n " \
-              f"Morning Index: {morning_index} \n " \
-              f"Noon Index: {noon_index} \n " \
-              f"Afternoon Index: {afternoon_index}" \
+    end_msg = f"FGI Scraper Ended, from Road device, {len(time_index_list)} data points scraped. \n" \
+              f"Morning Index: {morning_index} \n" \
+              f"Noon Index: {noon_index} \n" \
+              f"Afternoon Index: {afternoon_index} \n" \
               f"Max index: {max(all_index)} \n" \
               f"Min index: {min(all_index)} \n"
 
-    send_emails(LukeLab_Email, RECEIVER_EMAILS, 'FGI Scraper Notify: End', end_msg)
+    time.sleep(2)
+    res1, res2 = get_meeting_pro_and_total_prob()
+    time.sleep(60)
+
+    email_msg_body = end_msg + '\n' + res1 + '\n' + res2
+
+    send_emails(LukeLab_Email, RECEIVER_EMAILS, 'FGI Scraper Notify: End', email_msg_body)
 
 
 # start, run only once to creat the database:

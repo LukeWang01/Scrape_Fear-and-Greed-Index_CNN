@@ -1,0 +1,3 @@
+PAUSE
+PowerShell.exe
+PAUSE

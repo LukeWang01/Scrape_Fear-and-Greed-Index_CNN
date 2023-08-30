@@ -11,7 +11,7 @@ def job():
         # Run the script using Python
         command = f"python {script_path}"
         # subprocess.call(command, shell=True)
-        print("run job")
+        print("run job: scrape_fearidex")
         # Execute command in a new console window
         subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
     else:
@@ -50,3 +50,4 @@ print('Schedule Started')
 while True:
     schedule.run_pending()
     time.sleep(1)   # change to 5 seconds, reduce the cpu usage
+    # use 1 second

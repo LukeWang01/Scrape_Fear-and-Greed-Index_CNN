@@ -2,3 +2,7 @@
 _secret.py
 .idea
 *.xml
+*.pyc
+tmp.txt
+*.ipynb
+*.log
