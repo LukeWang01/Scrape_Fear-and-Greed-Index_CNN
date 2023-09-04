@@ -1,3 +1,0 @@
-PAUSE
-PowerShell.exe
-PAUSE
