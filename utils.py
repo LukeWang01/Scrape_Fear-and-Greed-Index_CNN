@@ -4,6 +4,13 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import pandas_market_calendars as mcal
+from datetime import datetime
+
+
+import yfinance as yf
+from datetime import datetime
+
 from _secret import LukeLab_Email, LukeLab_Email_Pwd
 
 
@@ -33,14 +40,17 @@ def send_emails(from_, to: list, msg_subject, msg_body):
     # send an email to multiple recipients
 
     sender_email = from_
-    receiver_emails = to  # ['recipient1@example.com', 'recipient2@example.com']
+    # ['recipient1@example.com', 'recipient2@example.com']
+    receiver_emails = to
     # message = msg_body
     #
     # msg = MIMEText(message)
 
-    message = f"""<pre style="font-family: 'Courier New', monospace;">{msg_body}</pre>"""
+    message = f"""<pre style="font-family: 'Courier New', monospace;">{
+        msg_body}</pre>"""
 
-    msg = MIMEText(message, 'html')  # change the font style with Equal-Width Characters
+    # change the font style with Equal-Width Characters
+    msg = MIMEText(message, 'html')
 
     msg['Subject'] = msg_subject
     msg['From'] = sender_email
@@ -52,15 +62,39 @@ def send_emails(from_, to: list, msg_subject, msg_body):
     with smtplib.SMTP('smtp.gmail.com', 587) as server:
         server.starttls()
         server.login(LukeLab_Email, LukeLab_Email_Pwd)
-        server.sendmail(LukeLab_Email, ['lukelabtorary@gmail.com'] + receiver_emails, msg.as_string())
+        server.sendmail(
+            LukeLab_Email, ['lukelabtorary@gmail.com'] + receiver_emails, msg.as_string())
 
 
 def set_up_app_logging():
     # set up logging
     log_file = os.path.join(os.getcwd(), 'running.log')
-    logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(filename=log_file, level=logging.DEBUG,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def logging_info(message: str):
     set_up_app_logging()
     logging.info(f'>>> {message}')  # write log
+
+
+def is_trading_day():
+    # Get today's date
+    today = datetime.now().date()
+
+    # Specify the market calendar (e.g., 'XNYS' for New York Stock Exchange)
+    nyse = mcal.get_calendar('XNYS')
+
+    # Check if today is a valid trading day
+    # return yes if today is a trading day, no if not.
+    return nyse.valid_days(start_date=today, end_date=today).size > 0
+
+
+def check_if_weekday():
+    tmp = datetime.now().date()
+    if tmp.weekday() < 5:
+        print("Today is a workday, starting the scrape at 9:00 am.")
+        return True
+    else:
+        print("Today is not a workday, skip the scrape.")
+        return False

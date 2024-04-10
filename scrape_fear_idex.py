@@ -14,6 +14,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from _secret import LukeLab_Email_Pwd, LukeLab_Email, MY_EMAIL, RECEIVER_EMAILS
 from scrape_cme import get_meeting_pro_and_total_prob
+from send_discord_msg_web_auth import send_msg_to_discord_request
 from utils import send_email, send_emails, logging_info
 
 # import chromedriver_autoinstaller as chromedriver
@@ -138,8 +139,13 @@ def get_time_index_list(hours=8, table_name='index_data'):
                                     f"Fear & Greed Index: {time_index[2]} \n" \
                                     f"A Fear & Greed Index daily summary will be sent after the market closed.\n"
 
+                msg_to_discord = '```\n'
+                msg_to_discord += schedule_msg_body
+                msg_to_discord += '```\n'
+
                 schedule.every().day.at("09:50").do(send_emails, LukeLab_Email, RECEIVER_EMAILS,
-                                                    'FGI Scraper Notify: Start', schedule_msg_body)
+                                                    'FGI Scraper Notify', schedule_msg_body)
+                schedule.every().day.at("09:51").do(send_msg_to_discord_request, msg_to_discord)
 
                 start_email_sent = True
 
@@ -185,12 +191,14 @@ def get_time_index_list(hours=8, table_name='index_data'):
     print('finish CME scrape')
     time.sleep(60)
 
-    email_msg_body = end_msg + '\n' + res1 + '\n' + res2
+    email_msg_body = '```\n' + end_msg + '\n' + res1 + '\n' + res2 + '```\n'
 
     try:
-        send_emails(LukeLab_Email, RECEIVER_EMAILS, 'FGI Scraper Notify: End', email_msg_body)
-    except:
+        send_emails(LukeLab_Email, RECEIVER_EMAILS, 'FGI Scraper Notify', email_msg_body)
+        send_msg_to_discord_request(email_msg_body)
+    except Exception as e:
         print('send emails CME error...')
+        print(e)
         time.sleep(3)
 
 
