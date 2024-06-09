@@ -1,3 +1,3 @@
 PAUSE
-PowerShell.exe -Command "python .\scrape_fear_idex.py"
+PowerShell.exe -Command "python .\scrape_fear_idx.py"
 PAUSE

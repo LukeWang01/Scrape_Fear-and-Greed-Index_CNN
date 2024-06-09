@@ -3,6 +3,10 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import time
 
+from _secret import LukeLab_Email, RECEIVER_EMAILS, discord_channel_cme_fed_watch_tool_id
+from send_discord_msg_web_auth import send_msg_to_discord_request
+from utils import send_emails
+
 
 def get_meeting_pro_and_total_prob():
     # Specify the URL
@@ -21,7 +25,7 @@ def get_meeting_pro_and_total_prob():
     # print(title)
 
     # Wait for the data to load (adjust the sleep time as needed)
-    time.sleep(3)
+    time.sleep(5)
 
     # Find the data elements using their XPath
     iframe = driver.find_element(By.ID, 'cmeIframe-jtxelq2f')
@@ -35,10 +39,13 @@ def get_meeting_pro_and_total_prob():
     prob = driver.find_element(By.ID, 'ctl00_MainContent_ucViewControl_IntegratedFedWatchTool_lbPTree')
     # print(prob)
     prob.click()
-    time.sleep(1)
+    time.sleep(10)
 
-    total_probabilities = driver.find_element(By.XPATH,
-                                              '//*[@id="MainContent_pnlContainer"]/div[3]/div/div/table[3]/tbody')
+    # total_probabilities = driver.find_element(By.XPATH, '//*[@id="MainContent_pnlContainer"]/div[3]/div/div/table[3]/tbody')
+    # grid-thm grid-thm-v2
+    # update the xpath
+    # //*[@id="MainContent_pnlContainer"]/div[3]/div/div/div[2]/table/tbody
+    total_probabilities = driver.find_element(By.XPATH, '//*[@id="MainContent_pnlContainer"]/div[3]/div/div/div[2]/table/tbody')
     # print(total_probabilities)
     rows = total_probabilities.find_elements(By.TAG_NAME, 'tr')
 
@@ -78,8 +85,10 @@ def get_meeting_pro_and_total_prob():
     total_probabilities_res = 'Total Probabilities:' + '\n' + total_probabilities_res
 
     # meeting probabilities
-    meeting_probabilities = driver.find_element(By.XPATH,
-                                                '//*[@id="MainContent_pnlContainer"]/div[3]/div/div/table[2]/tbody')
+    # grid-thm grid-thm-v2
+    # update the xpath
+    # meeting_probabilities = driver.find_element(By.XPATH, '//*[@id="MainContent_pnlContainer"]/div[3]/div/div/table[2]/tbody')
+    meeting_probabilities = driver.find_element(By.XPATH, '//*[@id="MainContent_pnlContainer"]/div[3]/div/div/div[1]/table/tbody')
     meeting_probabilities_rows = meeting_probabilities.find_elements(By.TAG_NAME, 'tr')
 
     tmp = ''
@@ -122,7 +131,35 @@ def get_meeting_pro_and_total_prob():
     meeting_probabilities_res = 'Meeting Probabilities:' + '\n' + formatted_data
 
     # Close the webdriver
-    time.sleep(20)
+    print('Scraping completed... quitting the driver in 10s')
+    time.sleep(10)
     driver.quit()
 
     return meeting_probabilities_res, total_probabilities_res
+
+
+if __name__ == '__main__':
+    try:
+        meeting_probabilities_res, total_probabilities_res = get_meeting_pro_and_total_prob()
+        print(meeting_probabilities_res)
+        print(total_probabilities_res)
+        end_msg = ""
+        end_msg += "```\n"
+        end_msg += meeting_probabilities_res + '\n'
+        end_msg += total_probabilities_res + '\n'
+        end_msg += "```\n"
+    except Exception as e:
+        print('scrape error, please check the element path...')
+        print(e)
+        end_msg = 'error from chrome driver, please check the HTML element path...'
+
+    try:
+        # send_emails(LukeLab_Email, RECEIVER_EMAILS, 'FGI Scraper Notify', end_msg)
+        # time.sleep(3)
+        send_msg_to_discord_request(end_msg, channel_id=discord_channel_cme_fed_watch_tool_id)
+    except Exception as e:
+        print('send emails CME error...')
+        print(e)
+        time.sleep(3)
+
+    input('Press Enter to exit...')
